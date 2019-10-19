@@ -7,21 +7,11 @@ app.use(express.json());
 var airNames = '';
 
 getAirName()
-    .then((data) => { 
-        data.forEach(air => {
-            fs.open('listAirWorld.txt', 'a', (err, fd) => {
-                if (err) throw err;
-                fs.appendFile(fd, air+"\n", 'utf8', (err) => {
-                    fs.close(fd, (err) => {
-                        if (err) throw err;
-                    });
-                    if (err) throw err;
-                });
-            });
-        });
+    .then((data) => {
+        console.log('fim');
     })
-    .catch(() => { 
-        console.log('falha'); 
+    .catch(() => {
+        console.log('falha');
     });
 
 app.listen(3000, () => {
@@ -29,7 +19,6 @@ app.listen(3000, () => {
 });
 
 async function getAirName() {
-    var names = [];
     var sigla = '';
     var endpoint = '';
 
@@ -37,8 +26,9 @@ async function getAirName() {
         for (var j = 0; j < 26; j++) {
             for (var z = 0; z < 26; z++) {
                 sigla = getLetra(i) + getLetra(j) + getLetra(z);
+                console.log(sigla);
                 endpoint = 'https://www.decolar.com/suggestions?locale=pt-BR&profile=sbox-cp-vh&hint=' + sigla + '&fields=city';
-                
+
                 await request.get(endpoint, { json: true }, (err, _res, body) => {
                     if (err) {
                         return;
@@ -46,20 +36,25 @@ async function getAirName() {
                     if (body.items.length == 0) {
                         return;
                     }
-                    
+
                     var airs = body.items[0]['items'];
 
-                    console.log(airs.length);
-
                     airs.forEach(air => {
-                        names.push(air.display);
+                        // names.push(air.display);
+                        fs.open('listAirWorld.txt', 'a', (err, fd) => {
+                            if (err) throw err;
+                            fs.appendFile(fd, air.display + "\n", 'utf8', (err) => {
+                                fs.close(fd, (err) => {
+                                    if (err) throw err;
+                                });
+                                if (err) throw err;
+                            });
+                        });
                     });
-                    console.log(names);
                 });
             }
         }
     }
-    return names;
 }
 
 function getLetra(i) {
